@@ -12,6 +12,8 @@ export class MembersListComponent {
 
   members!:Member[];
   apiUrl:string = `http://localhost:8080/api/v1/members`;
+
+
   filterBy!:string;
   searched!:string;
 
@@ -49,8 +51,8 @@ export class MembersListComponent {
 
   saveMember() {
     this.membersService.saveMember(this.saveMemberForm.value).subscribe( (response) => {
-        console.log("Membre ajouté avec succès");
         this.getMembers(this.apiUrl);
+        this.saveMemberForm.reset()
       },
       (error) => {
         console.log(error);

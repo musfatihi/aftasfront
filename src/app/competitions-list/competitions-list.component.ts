@@ -18,13 +18,17 @@ import Swal from 'sweetalert2';
 })
 export class CompetitionsListComponent implements OnInit{
 
+  apiUrl!:string;
+
+  //---------------------paging---------------------------
   actualPage:number=0;
   isFirstPage:boolean=true;
   isLastPage:boolean=true;
 
+  //-----------------------filter-------------------------
   stateCompetition:string='pending';
-  apiUrl!:string;
 
+  //-------------------------
   competitions!: Competition[];
   allMembers!:Member[];
   players!:RankingResp[];
@@ -47,16 +51,13 @@ export class CompetitionsListComponent implements OnInit{
   //-----------------------------------------
 
 
+  //--------------------------------Selected Competition------------------------
   selectedCompetition!:Competition;
 
+  //------------------------------------helpers-----------------------------------
   formWrapper!: any;
 
-  closeAllForms(){
-    this.addCompetitionOn=false;
-    this.addRankingOn=false;
-    this.addHuntingOn=false;
-    this.showLeaderBoardOn=false;
-  }
+
 
   constructor(private competitionsService:CompetitionsService,
               private membersService:MembersService,
@@ -73,7 +74,7 @@ export class CompetitionsListComponent implements OnInit{
       date: [null,[Validators.required]],
       startTime: [null, [Validators.required]],
       endTime: [null, [Validators.required]],
-      numberOfParticipants:[2,Validators.required],
+      numberOfParticipants:[null,Validators.required],
       location:[null,Validators.required],
       amount:[null,Validators.required]
     });
@@ -143,6 +144,7 @@ export class CompetitionsListComponent implements OnInit{
   saveCompetition() {
     const competition:Competition = this.saveCompetitionForm.value;
     this.competitionsService.saveCompetition(competition).subscribe((competition) => {
+        this.saveCompetitionForm.reset()
         this.getCompetitions();
       },
       (error) => {
@@ -208,10 +210,9 @@ export class CompetitionsListComponent implements OnInit{
   saveHunting() {
     this.huntingsService.saveHunting(this.saveHuntingForm.value).subscribe(
       (savedHunting) => {
-        console.log("hunting saved avec succès");
+        this.saveHuntingForm.reset();
       },
       (error) => {
-        console.log(this.saveHuntingForm.value);
         console.log(error);
       }
     );
@@ -222,18 +223,14 @@ export class CompetitionsListComponent implements OnInit{
   closeCompetition(code:string) {
     this.competitionsService.closeCompetition(code).subscribe(
       (response) => {
-        console.log("competition fermée avec succès");
+        this.getCompetitions();
       },
       (error) => {
         console.log(error);
       });
   }
 
-
-  isCloseable(competition:Competition){
-    return  new Date().getTime()>=new Date(competition.date+' '+competition.startTime).getTime();
-  }
-
+  //--------------------------------------Afficher le leaderBoard------------------------
 
   showLeaderBoard(code:string) {
     this.closeAllForms();
@@ -242,6 +239,25 @@ export class CompetitionsListComponent implements OnInit{
     })
     this.showLeaderBoardOn=true;
   }
+
+  //--------------------------------close all forms---------------------------------
+
+  closeAllForms(){
+    this.addCompetitionOn=false;
+    this.addRankingOn=false;
+    this.addHuntingOn=false;
+    this.showLeaderBoardOn=false;
+  }
+
+
+
+  //----------------------------------display the appropriate action for each competition
+
+
+  isCloseable(competition:Competition){
+    return  new Date().getTime()>=new Date(competition.date+' '+competition.startTime).getTime();
+  }
+
 
   isTherePlaces(competition:Competition):boolean{
     return competition.rankingList.length<competition.numberOfParticipants;
@@ -261,6 +277,9 @@ export class CompetitionsListComponent implements OnInit{
            new Date().getTime()<=new Date(competition.date+' '+competition.endTime).getTime();
 
   }
+
+
+  //---------------------------------filter competitions--------------------------------
 
   updateState(){
     this.actualPage=0;

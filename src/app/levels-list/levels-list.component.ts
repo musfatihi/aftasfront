@@ -2,6 +2,8 @@ import { Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Level} from "../models/level/level.model";
 import {LevelsService} from "../services/levels/levels.service";
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-levels-list',
@@ -11,6 +13,8 @@ import {LevelsService} from "../services/levels/levels.service";
 export class LevelsListComponent implements OnInit{
   addLevelOn: boolean=true;
   saveLevelForm!: FormGroup;
+
+  levels!:Level[];
 
   constructor(private levelsService:LevelsService,
               private fb:FormBuilder) {
@@ -25,9 +29,6 @@ export class LevelsListComponent implements OnInit{
     });
   }
 
-
-  levels!:Level[];
-
   private getLevels() {
     this.levelsService.getAllLevels().subscribe((data:any)=>{
       this.levels = data;
@@ -36,11 +37,16 @@ export class LevelsListComponent implements OnInit{
 
   saveLevel() {
     this.levelsService.saveLevel(this.saveLevelForm.value).subscribe( (level) => {
-        console.log("Level ajouté avec succès");
         this.getLevels();
+        this.saveLevelForm.reset()
       },
       (error) => {
-        console.log(error);
+        Swal.fire({
+          title: 'Erreur',
+          text: 'Données incorrectes',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
       });
   }
 
@@ -49,11 +55,13 @@ export class LevelsListComponent implements OnInit{
   }
 
   deleteLevel(code:number){
-    this.levelsService.deleteLevel(code).subscribe( (level) => {
+    this.levelsService.deleteLevel(code).subscribe({
+      next: () => {
+       this.getLevels();
+      },error:(err) =>{
         this.getLevels();
-      },
-      (error) => {
-        this.getLevels();
-      });
+      }
+    });
   }
+
 }

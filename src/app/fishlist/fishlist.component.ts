@@ -40,8 +40,8 @@ export class FishlistComponent {
 
   saveFish() {
     this.fishService.saveFish(this.saveFishForm.value).subscribe( (response) => {
-        console.log("Poisson ajoutée avec succès");
         this.getFishList();
+        this.saveFishForm.reset()
       },
       (error) => {
         console.log(error);

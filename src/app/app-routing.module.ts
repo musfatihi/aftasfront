@@ -11,7 +11,7 @@ const routes: Routes = [
   {path:"members",component:MembersListComponent},
   {path:"fishList",component:FishlistComponent},
   {path:"levels",component:LevelsListComponent},
-  {path:"home",component:HomeComponent},
+  {path:"",component:HomeComponent},
 ];
 
 @NgModule({
